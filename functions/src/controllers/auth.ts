@@ -86,7 +86,14 @@ class Auth {
         if (!doc.exists) {
           return res.status(403).json({message: `А пользователя то и нет!!!`});
         }
-        return doc.data();
+        let info = {
+          login: doc.data()!.login,
+          firstName: doc.data()!.firstName,
+          lastName: doc.data()!.lastName,
+          access: doc.data()!.access,
+          smena: doc.data()!.smena
+        };
+        return info;
       })
       .then(data => {
         res.status(200).json(data);
@@ -94,6 +101,18 @@ class Auth {
       .catch(err => {
         console.error(`Ошибка: ${err}`);
         res.status(500).json({ error: `Пользователь не найден: ${err.code}` });
+      });
+  };
+  delete = (req: express.Request, res: express.Response) => { 
+    const login = req.params.login;
+    db.doc(`/user/${login}`)
+      .delete()
+      .then(() => {
+        res.status(200).json({ message: `Пользователь ${login}, успешно удален!` });
+      })
+      .catch(err => { 
+        console.error(`Ошибка при удалении пользователя: ${err}`);
+        res.status(500).json({ message: `Ошибка удаления пользователя: ${err}` });
       });
   };
 }

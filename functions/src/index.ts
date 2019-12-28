@@ -14,5 +14,6 @@ app.get('/', (_: any, res: express.Response) => {
 app.post('/auth', authCtrl.create);
 app.post('/getMe', authCtrl.show);
 app.get(`/user/:login`, verifyToken, authCtrl.info);
+app.delete(`/user/:login`, verifyToken, authCtrl.delete);
 
 exports.api = functions.https.onRequest(app);
