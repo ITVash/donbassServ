@@ -6,29 +6,18 @@ export default (req: express.Request, res: express.Response, next:express.NextFu
   let idToken: string;
   if ( req.headers.authorization && req.headers.authorization.startsWith('Bearer ') ) {
     idToken = req.headers.authorization.split('Bearer ')[1];
-    jwt.verify(idToken, config, (err, decodeJWT) => { 
-      if (err || !decodeJWT) {
-        res.status(403).json({message: `Ой ой ой, а токен та не настоящий!`})
-      } else {
-        //res.status(200).json(decodeJWT);
-        //req.user = decodeJWT;
-        next();
-      }
-    });
   } else {
     console.error('Токен не найден!');
     return res.status(403).json({ error: 'Вы не авторизованы!' });
   }
-  /*new Promise((resolve:any, reject:any) => {
-    jwt.verify(idToken, config || '', (err:any, decodeJWT:any) => { 
-      if (err || !decodeJWT) {
-        return res.status(403).json(reject(err));
-      }
-      resolve(decodeJWT);
-      return; 
-    });
-  });*/
-  return;
+  jwt.verify(idToken, config, (err, decodeJWT) => { 
+    if (err || !decodeJWT) {
+      res.status(403).json({message: `Ой ой ой, а токен та не настоящий!`})
+    } else {
+      next();
+    }
+  });
+  return true;
 };
 /*export default (token: string) =>
   new Promise((resolve:any, reject:any) => {

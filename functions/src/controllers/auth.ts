@@ -54,9 +54,10 @@ class Auth {
       });
   };
   show = (req: express.Request, res: express.Response) => {
-    const user = req.body.login;
+    const { login, password } = req.body;
     db.collection(`user`)
-      .where('login','==',user)
+      .where('login', '==', login)
+      .where('password', '==', password)
       .get()
       .then(doc => {
         const userData:any = [];
@@ -86,7 +87,7 @@ class Auth {
         if (!doc.exists) {
           return res.status(403).json({message: `А пользователя то и нет!!!`});
         }
-        let info = {
+        const info = {
           login: doc.data()!.login,
           firstName: doc.data()!.firstName,
           lastName: doc.data()!.lastName,
@@ -113,6 +114,40 @@ class Auth {
       .catch(err => { 
         console.error(`Ошибка при удалении пользователя: ${err}`);
         res.status(500).json({ message: `Ошибка удаления пользователя: ${err}` });
+      });
+  };
+  edit = (req: express.Request, res: express.Response) => { 
+    const login = req.params.login;
+    const data = {
+      login: req.body.login,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      phone: req.body.phone,
+      password: req.body.password,
+      access: req.body.access,
+      smena: req.body.smena,
+      updateAt: new Date().toJSON()
+    };
+    db.doc(`/user/${login}`)
+      .update(data)
+      .then(() => {
+        return db.doc(`/user/${login}`).get();
+      })
+      .then(doc => {
+        if (doc.exists) {
+          const status = {
+            login: doc.data().login,
+            firstName: doc.data().firstName,
+            lastName: doc.data().lastName,
+            access: doc.data().access,
+            smena: doc.data().smena
+          };
+          res.status(200).json({ message: `Данные пользователя обновлены!`, data: status });
+        } else res.status(500).json({ message: `Ошибка получения данных!` });   
+      })
+      .catch(err => { 
+        console.error(`Ошибка при обновлении данных пользователя!`);
+        res.status(500).json({ message: `Ошибка обнавления данных ${err.code}` });
       });
   };
 }
