@@ -4,11 +4,12 @@ import * as cors from 'cors';
 import * as dotenv from 'dotenv'
 import * as webpush from 'web-push'
 
-import { Auth, TimeTable } from './controllers';
+import { Auth, TimeTable, Notifications } from './controllers'
 import { verifyToken } from './utils'
 
 const authCtrl = new Auth();
 const timeTableCtrl = new TimeTable();
+const notifiCtrl = new Notifications()
 const app = express();
 dotenv.config()
 app.use(cors());
@@ -38,8 +39,9 @@ app.delete('/timetable', verifyToken, timeTableCtrl.delete);
 /**
  * Роут Нотификации
  */
-
-app.post('/notifications/subscribe', (req: express.Request, res: express.Response) => {
+app.post('/notifications/subscribe', notifiCtrl.create)
+app.post('/notifications/send', notifiCtrl.sendAll)
+/*app.post('/notifications/subscribe', (req: express.Request, res: express.Response) => {
   const subscription = req.body
   console.log(subscription)
   const payload = JSON.stringify({
@@ -52,7 +54,7 @@ app.post('/notifications/subscribe', (req: express.Request, res: express.Respons
     .catch(e => console.log(e.stack))
 
   res.status(200).json({'success': true})
-})
+})*/
  
 
 exports.api = functions.https.onRequest(app);
