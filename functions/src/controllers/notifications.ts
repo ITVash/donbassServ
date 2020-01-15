@@ -12,7 +12,7 @@ class Notifications {
       .get()
       .then(doc => {
         if (doc.exists) {
-          return res.status(400).json({message:`Пользователь ${auth} уже есть в базе данных`})
+          return res.status(200).json({message:`Пользователь ${auth} уже есть в базе данных`})
         } else {
           return doc
         }
