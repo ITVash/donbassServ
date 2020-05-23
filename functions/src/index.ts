@@ -3,6 +3,7 @@ import * as express from 'express';
 import * as cors from 'cors';
 import * as dotenv from 'dotenv'
 import * as webpush from 'web-push'
+import * as nodemailer from 'nodemailer'
 
 import { Auth, TimeTable, Notifications } from './controllers'
 import { verifyToken } from './utils'
@@ -41,6 +42,37 @@ app.delete('/timetable', verifyToken, timeTableCtrl.delete);
  */
 app.post('/notifications/subscribe', notifiCtrl.create)
 app.post('/notifications/send', notifiCtrl.sendAll)
+
+app.post('/sendforms', (req: express.Request, res: express.Response) => {
+  const values = req.body
+  const transport = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: "vashdns@gmail.com",
+      pass: "ragnarok1985"
+    }
+  })
+  transport.sendMail({
+    from: "robot@itd.company",
+    to: "vashdns@gmail.com",
+    subject: "Обратная связь с сайта",
+    text: `${values.text}`,
+    html: `<p>Имя отправителя: ${values.name}</p>
+    <p>Телефон отправителя: ${values.phone}</p>
+    <p>Почта отправителя: ${values.email}</p>
+    <p>Сообщение: <br /> ${values.text}</p>`
+  }, (error, info):void => {
+      if (error) {
+        console.log('Ошибка отправки почты!', error)
+        res.status(500).json(error)
+      } else {
+        console.log('Почта отправлена!', info)
+        res.status(200).json(info)
+      }
+  })
+})
 /*app.post('/notifications/subscribe', (req: express.Request, res: express.Response) => {
   const subscription = req.body
   console.log(subscription)
